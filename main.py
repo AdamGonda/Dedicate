@@ -1,5 +1,7 @@
 from kivy.app import App
 from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.lang import Builder
 from kivy.clock import Clock
@@ -7,6 +9,7 @@ from kivy.logger import Logger
 from kivy.properties import StringProperty, ListProperty, BooleanProperty
 import time
 import random as r
+import os
 
 
 Builder.load_file("myKivyFile.kv")
@@ -29,10 +32,11 @@ class CountDown():
 
 
 class QAScreen(Screen):
-    # this class has to manage a questions from a given collection
+    # this class has to manage a questions and answers from a given collection
     def __init__(self):
         Screen.__init__(self)
-        self.name = "QA"
+        self.name = "QAScreen"
+        self.winScreen = "WinScreen"
         self.timer = CountDown()
         self.questions = None
         self.question_index = 0
@@ -40,12 +44,15 @@ class QAScreen(Screen):
         self.is_game_started = False
         self.is_game_over = False
         self.lives = 3
+        self.default_collecton_folder = "collections"
+        self.selected_collection = None
         
+    
     time_prop = StringProperty("30")
     questions_prop = ListProperty(["Question", "A1", "A2", "A3", "A4"])
     lives_prop = StringProperty("3")
-    
-    def load_set(self, file_name):
+
+    def load_collection(self, file_name):
         with open(file_name, "r") as file:
             contents = file.readlines()
             contents = [item.replace("\n", "") for item in contents]
@@ -81,7 +88,7 @@ class QAScreen(Screen):
                         if self.question_index < len(self.questions) - 1:
 
                             self.question_index += 1
-                            self.set_question_and_answers()
+                            self.set_questions_and_answers_randomly()
 
                         else:
                             self.win()
@@ -96,15 +103,14 @@ class QAScreen(Screen):
 
     def win(self):
         Logger.info(self.manager.current)
-        self.manager.current = 'WIN'
+        self.manager.current = self.winScreen
         
-
     def game_over(self):
         self.is_game_over = True
         self.is_game_started = False
         self.manager.current = "LOSE"
 
-    def set_question_and_answers(self, *args):
+    def set_questions_and_answers_randomly(self, *args):
         # choose from answers randomly
         self.questions_prop[0] = self.questions[self.question_index][0]
         av_q = [1, 2, 3, 4]
@@ -125,9 +131,8 @@ class QAScreen(Screen):
             self.time_prop = str(self.timer.get_time())
             Clock.schedule_interval(self.update_clock, 1.0/60.0)
             # Load and set questions and answers
-            self.questions = self.load_set("test_collection.txt")
-            self.load_set("test_collection.txt")
-            self.set_question_and_answers()
+            self.questions = self.load_collection(self.default_collecton_folder + "/" + self.selected_collection)
+            self.set_questions_and_answers_randomly()
 
         else:
             pass
@@ -141,29 +146,65 @@ class QAScreen(Screen):
         else:
             self.time_prop = str(self.timer.get_time())
 
+
 class WinScreen(Screen):
     def __init__(self):
         Screen.__init__(self)
-        self.name = "WIN"
+        self.name = "WinScreen"
+
 
 class LoseScreen(Screen):
     def __init__(self):
         Screen.__init__(self)
-        self.name = "LOSE"
+        self.name = "LoseScreen"
+
 
 class MainScreen(Screen):
     def __init__(self):
         Screen.__init__(self)
-        self.name = "MAIN"
-    
+        self.name = "MainScreen"
+
+
+class CollectionSelectScreen(Screen):
+    def __init__(self):
+        Screen.__init__(self)
+        self.name = "CollectionSelectScreen"
+        self.default_collecton_folder = "./collections"
+        self.collections = []
+        self.load_collections()
+        self.initialize_collecion_buttons()
+
+    def load_collections(self):
+        if os.path.isdir(self.default_collecton_folder):
+            self.collections = sorted(os.listdir(self.default_collecton_folder))
+
+    def initialize_collecion_buttons(self):
+        box_layout = BoxLayout(orientation="vertical")
+        for i in range(len(self.collections)):
+            btn = Button(text=self.collections[i])
+            btn.bind(on_press=self.on_select)
+            box_layout.add_widget(btn)
+
+        self.add_widget(box_layout)
+
+    def on_select(self, btn):
+        self.manager.get_screen("QAScreen").selected_collection = btn.text
+        self.manager.get_screen("QAScreen").on_start()
+        self.manager.current = "QAScreen"
+
+        Logger.info(self.manager.get_screen("QAScreen").selected_collection)
+
+            
+
+
+
 
 class MyApp(App):
     def build(self):
         screen_manager = ScreenManager()
 
-        
-        
         screen_manager.add_widget(MainScreen())
+        screen_manager.add_widget(CollectionSelectScreen())
         screen_manager.add_widget(QAScreen())
         screen_manager.add_widget(WinScreen())
         screen_manager.add_widget(LoseScreen())
