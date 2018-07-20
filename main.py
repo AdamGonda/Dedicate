@@ -37,80 +37,98 @@ class QAScreen(Screen):
         Screen.__init__(self)
         self.name = "QAScreen"
         self.winScreen = "WinScreen"
+        self.loseScreen = "LoseScreen"
         self.timer = CountDown()
         self.questions = None
-        self.question_index = 0
+        self.question_index = -1
         self.initial_timer_time = 30
         self.is_game_started = False
         self.is_game_over = False
+        self.is_exit_timer = False
         self.lives = 3
         self.default_collecton_folder = "collections"
         self.selected_collection = None
+        self.default_questions_prop_values = ["Question", "A1", "A2", "A3", "A4"]
         
-    
     time_prop = StringProperty("30")
     questions_prop = ListProperty(["Question", "A1", "A2", "A3", "A4"])
     lives_prop = StringProperty("3")
 
+    def reset_screen(self):
+        self.questions = None
+        self.question_index = -1
+        self.initial_timer_time = 30
+        self.lives = 3
+        self.is_game_started = False
+        self.is_game_over = False
+        self.is_exit_timer = True
+        self.time_prop = str(self.initial_timer_time)
+        for i in range(len(self.questions_prop)):
+            self.questions_prop[i] = self.default_questions_prop_values[i]
+        self.lives_prop = str(self.lives)
+        
     def load_collection(self, file_name):
         with open(file_name, "r") as file:
             contents = file.readlines()
             contents = [item.replace("\n", "") for item in contents]
             contents = [item.split(",") for item in contents]
-            rSet = []
+            collection = []
 
             for q_and_as in contents:
-                question_structure = []
+                question_and_answers = []
                 for i in range(len(q_and_as)):
                     if i == 0:
-                        question_structure.append(q_and_as[i])
+                        question_and_answers.append(q_and_as[i])
                     elif i == 1:
                         answer = [q_and_as[i].strip(' '), True]
-                        question_structure.append(answer)
+                        question_and_answers.append(answer)
                     else:
                         answer = [q_and_as[i].strip(' '), False]
-                        question_structure.append(answer)
+                        question_and_answers.append(answer)
 
-                rSet.append(question_structure)
+                collection.append(question_and_answers)
 
-            return rSet  
+            return collection  
 
-    def on_check_answer(self, instance):
+    def on_check_answer(self, btn):
+        
         if self.is_game_started and not self.is_game_over:
-            current_question_set = self.questions[self.question_index]
+            current_q_and_a = self.questions[self.question_index]
 
-            for i in range(1, len(current_question_set)):
+            for i in range(1, len(current_q_and_a)):
 
-                if current_question_set[i][0] == instance.text:
-                    if current_question_set[i][1]:
-                        
-                        # go to next question if it is possible
-                        if self.question_index < len(self.questions) - 1:
-
-                            self.question_index += 1
-                            self.set_questions_and_answers_randomly()
-
-                        else:
-                            self.win()
+                answer = current_q_and_a[i][0]
+                answer_value = current_q_and_a[i][1]
+                
+                if answer == btn.text and answer_value:
+                    
+                    # go to next question if it is possible
+                    if self.question_index < len(self.questions) - 1:
+                        self.update_question()
                     else:
-                        # decrease lives
-                        if self.lives > 1:
-                            self.lives -= 1
-                            # update lives_prop
-                            self.lives_prop = str(self.lives)
-                        else:
-                            self.game_over()
+                        self.win()
+                    break
+                else:
+                    Logger.info("Lives: "+str(self.lives))
+                    # decrease lives
+                    if self.lives > 1:
+                        self.lives -= 1
+                        # update lives_prop
+                        self.lives_prop = str(self.lives)
+                    else:
+                        self.game_over()
+                    break
 
     def win(self):
-        Logger.info(self.manager.current)
         self.manager.current = self.winScreen
         
     def game_over(self):
         self.is_game_over = True
         self.is_game_started = False
-        self.manager.current = "LOSE"
+        self.manager.current = self.loseScreen
 
-    def set_questions_and_answers_randomly(self, *args):
+    def update_question(self, *args):
+        self.question_index += 1
         # choose from answers randomly
         self.questions_prop[0] = self.questions[self.question_index][0]
         av_q = [1, 2, 3, 4]
@@ -121,10 +139,10 @@ class QAScreen(Screen):
 
     def on_start(self):
         if not self.is_game_started:
-
             # Set state variables
             self.is_game_started = True
             self.is_game_over = False
+            self.is_exit_timer = False
             # Start a clock
             self.timer.reset()
             self.timer.start(self.initial_timer_time)
@@ -132,8 +150,7 @@ class QAScreen(Screen):
             Clock.schedule_interval(self.update_clock, 1.0/60.0)
             # Load and set questions and answers
             self.questions = self.load_collection(self.default_collecton_folder + "/" + self.selected_collection)
-            self.set_questions_and_answers_randomly()
-
+            self.update_question()
         else:
             pass
     
@@ -141,7 +158,7 @@ class QAScreen(Screen):
         if int(self.time_prop) == 0:
             self.game_over()
             return False
-        elif self.is_game_over:
+        elif self.is_game_over or self.is_exit_timer:
             return False
         else:
             self.time_prop = str(self.timer.get_time())
@@ -189,11 +206,8 @@ class CollectionSelectScreen(Screen):
 
     def on_select(self, btn):
         self.manager.get_screen("QAScreen").selected_collection = btn.text
-        self.manager.get_screen("QAScreen").on_start()
+        self.manager.get_screen("QAScreen").reset_screen()
         self.manager.current = "QAScreen"
-
-        Logger.info(self.manager.get_screen("QAScreen").selected_collection)
-
             
 
 

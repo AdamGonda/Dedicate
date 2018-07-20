@@ -4,7 +4,12 @@
 
 <MenuButton@Button>:
     size_hint: 0.5, 0.3
+
+<CollectionSelectScreen>:
     
+
+
+
 
 <MainScreen>:
     BoxLayout:
@@ -15,7 +20,7 @@
             text: 'Goto QA'
             on_press:
                 root.manager.transition.direction = 'left'
-                root.manager.current = 'QA'
+                root.manager.current = 'CollectionSelectScreen'
                 
             
 
@@ -23,19 +28,21 @@
             text: 'Stats'
             on_press:
                 root.manager.transition.direction = 'left'
-                root.manager.current = 'WIN'
+                root.manager.current = 'WinScreen'
         
         MenuButton:
             text: 'Store'
             on_press:
                 root.manager.transition.direction = 'left'
-                root.manager.current = 'Store'
+                root.manager.current = 'WinScreen'
                 
         MenuButton:
             text: 'Quit'
             on_press:
                 app.stop()
 
+<CollectionSelectScreen>:
+    
 
 <QAScreen>:
     
@@ -50,7 +57,7 @@
                 Button:
                     on_press:
                         root.manager.transition.direction = 'right'
-                        root.manager.current = 'MAIN'
+                        root.manager.current = 'MainScreen'
                     font_size: 30
                     size_hint: 0.3, 1
                     Image:
@@ -142,8 +149,8 @@
 
 <WinScreen>:
     Label:
-        text:"Yout Won"
+        text:"You won"
 
 <LoseScreen>:
     Label:
-        text:"Yout Lose"
+        text:"You Lose"
