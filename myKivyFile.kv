@@ -1,9 +1,10 @@
 #:kivy 1.0
-<AnswerButton@Button>:
+<AnswerButton>:
     font_size: 30
 
 <MenuButton@Button>:
     size_hint: 0.5, 0.3
+    
 
 <CollectionSelectScreen>:
     
@@ -42,6 +43,11 @@
                 app.stop()
 
 <CollectionSelectScreen>:
+    BoxLayout:
+        id: btn_container
+        orientation: "vertical"
+        size_hint: 0.6, 1
+        pos_hint: {"center_x":0.5, "center_y":0.5}
     
 
 <QAScreen>:
@@ -110,7 +116,7 @@
                     
             Label:
                 id: Question
-                text: root.questions_prop[0]
+                text: root.currant_q_and_a[0]
                 font_size: 30
                 size_hint: 1, 0.9
 
@@ -119,7 +125,7 @@
                 size_hint: 1, 0.4
                 AnswerButton:
                     id: A1 
-                    text: root.questions_prop[1]
+                    text: root.currant_q_and_a[1]
                     font_size: 30
                     on_press: root.on_check_answer(self)
                     
@@ -127,7 +133,7 @@
                 
                 AnswerButton:
                     id: A2 
-                    text: root.questions_prop[2]
+                    text: root.currant_q_and_a[2]
                     font_size: 30
                     on_press: root.on_check_answer(self)
                     
@@ -135,13 +141,13 @@
                 size_hint: 1, 0.4
                 AnswerButton:
                     id: A3 
-                    text: root.questions_prop[3]
+                    text: root.currant_q_and_a[3]
                     font_size: 30
                     on_press: root.on_check_answer(self)
 
                 AnswerButton:
                     id: A4 
-                    text: root.questions_prop[4]
+                    text: root.currant_q_and_a[4]
                     font_size: 30
                     on_press: root.on_check_answer(self)
 
