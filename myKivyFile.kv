@@ -1,4 +1,5 @@
 #:kivy 1.0
+
 <AnswerButton>:
     font_size: 30
 
@@ -19,6 +20,7 @@
         pos_hint:{"x": 0.25, "y": 0}
         MenuButton:
             text: 'Goto QA'
+            
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'CollectionSelectScreen'
@@ -43,11 +45,30 @@
                 app.stop()
 
 <CollectionSelectScreen>:
+    Button:
+        on_press:
+            root.manager.transition.direction = 'right'
+            root.manager.current = 'MainScreen'
+
+        size_hint: 0.2, 0.06
+        pos_hint: {"x":0, "y":0.94}
+
+        Image:
+            source: "./Arrow_white.png"
+            center_x: self.parent.center_x
+            center_y: self.parent.center_y
+
+        
+            
+        
+
     BoxLayout:
+
         id: btn_container
         orientation: "vertical"
         size_hint: 0.6, 1
         pos_hint: {"center_x":0.5, "center_y":0.5}
+        
     
 
 <QAScreen>:
@@ -62,8 +83,9 @@
                 size_hint: 1, 0.1
                 Button:
                     on_press:
+                        root.set_is_exit_timer()
                         root.manager.transition.direction = 'right'
-                        root.manager.current = 'MainScreen'
+                        root.manager.current = 'CollectionSelectScreen'
                     font_size: 30
                     size_hint: 0.3, 1
                     Image:
@@ -156,7 +178,34 @@
 <WinScreen>:
     Label:
         text:"You won"
+    Button:
+        
+        on_press:
+            root.manager.transition.direction = 'right'
+            root.manager.current = 'MainScreen'
+
+        size_hint: 0.2, 0.06
+        pos_hint: {"x":0, "y":0.94}
+
+        Image:
+            source: "./Arrow_white.png"
+            center_x: self.parent.center_x
+            center_y: self.parent.center_y
+            
 
 <LoseScreen>:
     Label:
-        text:"You Lose"
+        text:"Game Over"
+    Button:
+        
+        on_press:
+            root.manager.transition.direction = 'right'
+            root.manager.current = 'MainScreen'
+
+        size_hint: 0.2, 0.06
+        pos_hint: {"x":0, "y":0.94}
+
+        Image:
+            source: "./Arrow_white.png"
+            center_x: self.parent.center_x
+            center_y: self.parent.center_y

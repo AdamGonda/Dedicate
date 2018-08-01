@@ -16,19 +16,12 @@ Builder.load_file("myKivyFile.kv")
 
 
 class CountDown():
-    def __init__(self):
-        self.start_time = 0
-        self.initial_time = 0
-
     def start(self, set_time):
-        self.initial_time = set_time
+        self.count_from = set_time
         self.start_time = time.time()
 
-    def reset(self):
-        self.start_time = 0
-
     def get_time(self):
-        return self.initial_time - int(time.time() - self.start_time + 1)
+        return self.count_from - int(time.time() - self.start_time)
 
 
 class AnswerButton(Button):
@@ -38,7 +31,12 @@ class AnswerButton(Button):
 
 
 class QAScreen(Screen):
-    # this class has to manage a questions and answers from a given collection
+    # this class has to manage the questions and answers from a given collection
+    DEFAULT_TIMER_TIME = 30
+    DEFAULT_Q_AND_A_VALUES = ["Question", "A1", "A2", "A3", "A4"]
+    DEFAULT_COLLECTIONS_FOLDER = "collections"
+    DEFAULT_FILE_EXTENSION = ".txt"
+
     def __init__(self, **kw):
         super(QAScreen, self).__init__(**kw)
 
@@ -46,36 +44,40 @@ class QAScreen(Screen):
         self.winScreen = "WinScreen"
         self.loseScreen = "LoseScreen"
         self.timer = CountDown()
+        self.selected_collection = None
+        self.lives = 3
+
         self.questions = None
         self.question_index = -1
-        self.initial_timer_time = 30
+
         self.is_game_started = False
         self.is_game_over = False
         self.is_exit_timer = False
-        self.lives = 3
-        self.default_collecton_folder = "collections"
-        self.selected_collection = None
-        self.default_questions_prop_values = ["Question", "A1", "A2", "A3", "A4"]
         
-    time_prop = StringProperty("30")
+    time_prop = StringProperty("")
     currant_q_and_a = ListProperty(["Question", "A1", "A2", "A3", "A4"])
     lives_prop = StringProperty("3")
+
+    def set_is_exit_timer(self):
+        self.is_exit_timer = True
+
+    def set_to_default_currant_q_and_a(self):
+        for i in range(len(self.currant_q_and_a)):
+            self.currant_q_and_a[i] = self.DEFAULT_Q_AND_A_VALUES[i]
 
     def reset_screen(self):
         self.questions = None
         self.question_index = -1
-        self.initial_timer_time = 30
         self.lives = 3
         self.is_game_started = False
         self.is_game_over = False
-        self.is_exit_timer = True
-        self.time_prop = str(self.initial_timer_time)
-        for i in range(len(self.currant_q_and_a)):
-            self.currant_q_and_a[i] = self.default_questions_prop_values[i]
+        self.is_exit_timer = False
+        self.time_prop = str(self.DEFAULT_TIMER_TIME)
+        self.set_to_default_currant_q_and_a()
         self.lives_prop = str(self.lives)
         
     def load_collection(self, file_name):
-        with open(file_name, "r") as file:
+        with open(file_name + self.DEFAULT_FILE_EXTENSION, "r") as file:
             contents = file.readlines()
             contents = [item.replace("\n", "") for item in contents]
             contents = [item.split(",") for item in contents]
@@ -151,15 +153,12 @@ class QAScreen(Screen):
             self.is_game_over = False
             self.is_exit_timer = False
             # Start a clock
-            self.timer.reset()
-            self.timer.start(self.initial_timer_time)
-            self.time_prop = str(self.timer.get_time())
+            
+            self.timer.start(self.DEFAULT_TIMER_TIME)
             Clock.schedule_interval(self.update_clock, 1.0/60.0)
             # Load and set questions and answers
-            self.questions = self.load_collection(self.default_collecton_folder + "/" + self.selected_collection)
+            self.questions = self.load_collection(self.DEFAULT_COLLECTIONS_FOLDER + "/" + self.selected_collection)
             self.update_question()
-        else:
-            pass
     
     def update_clock(self, dt):
         if int(self.time_prop) == 0:
@@ -190,31 +189,33 @@ class MainScreen(Screen):
 
 
 class CollectionSelectScreen(Screen):
+    DEFAULT_COLLECTIONS_FOLDER = "./collections"
+
     def __init__(self, **kw):
         super(CollectionSelectScreen, self).__init__(**kw)
         self.name = "CollectionSelectScreen"
-        self.default_collecton_folder = "./collections"
         self.collections = []
         
         self.load_collections()
         self.initialize_screen_layout()
 
     def load_collections(self):
-        if os.path.isdir(self.default_collecton_folder):
-            self.collections = sorted(os.listdir(self.default_collecton_folder))
+        if os.path.isdir(self.DEFAULT_COLLECTIONS_FOLDER):
+            self.collections = sorted(os.listdir(self.DEFAULT_COLLECTIONS_FOLDER))
 
     def initialize_screen_layout(self):
         box_layout = self.ids["btn_container"]
         for i in range(len(self.collections)):
-            btn = Button(text=self.collections[i])
+            btn = Button(text=self.collections[i].replace(".txt", ''))
             btn.bind(on_press=self.on_select)
             box_layout.add_widget(btn)
 
     def on_select(self, btn):
         self.manager.get_screen("QAScreen").selected_collection = btn.text
         self.manager.get_screen("QAScreen").reset_screen()
+        self.manager.transition.direction = 'left'
         self.manager.current = "QAScreen"
-        
+    
 
 class MyApp(App):
     def build(self):
