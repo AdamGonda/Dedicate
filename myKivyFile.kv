@@ -1,21 +1,21 @@
 #:kivy 1.0
 
 <AnswerButton>:
-    font_size: 30
+    font_size: 60
+    background_normal:"btn_normal.png"
+    background_down:"btn_normal.png"
+    
 
 <MenuButton@Button>:
     size_hint: 0.5, 0.3
+    background_normal:"btn_normal.png"
+    font_size: 60
     
 
 <CollectionSelectScreen>:
-    
-
-
-
 
 <MainScreen>:
     BoxLayout:
-        
         orientation: "vertical"
         pos_hint:{"x": 0.25, "y": 0}
         MenuButton:
@@ -25,8 +25,6 @@
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'CollectionSelectScreen'
                 
-            
-
         MenuButton:
             text: 'Stats'
             on_press:
@@ -34,7 +32,7 @@
                 root.manager.current = 'WinScreen'
         
         MenuButton:
-            text: 'Store'
+            text: 'Question editor'
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'WinScreen'
@@ -53,14 +51,11 @@
         size_hint: 0.2, 0.06
         pos_hint: {"x":0, "y":0.94}
 
+        background_normal:"btn_normal.png"
         Image:
             source: "./Arrow_white.png"
             center_x: self.parent.center_x
             center_y: self.parent.center_y
-
-        
-            
-        
 
     BoxLayout:
 
@@ -69,12 +64,8 @@
         size_hint: 0.6, 1
         pos_hint: {"center_x":0.5, "center_y":0.5}
         
-    
-
 <QAScreen>:
-    
     BoxLayout:
-        
         orientation: "vertical"
         BoxLayout:
             orientation: "vertical"
@@ -88,6 +79,7 @@
                         root.manager.current = 'CollectionSelectScreen'
                     font_size: 30
                     size_hint: 0.3, 1
+                    background_normal:"btn_normal.png"
                     Image:
                         source: "./Arrow_white.png"
                         center_x: self.parent.center_x
@@ -96,11 +88,10 @@
                 Label:
                     id: TimerLabel
                     text: root.time_prop
-                    font_size: 30
+                    color: 0,0,0,1
+                    font_size: 40
                     size_hint: 0.5, 1
 
-
-                
                 BoxLayout:
                     size_hint: 0.5, 1
 
@@ -110,53 +101,45 @@
                     Label:
                         id: LivesLable
                         text: "Lives:"
-                        font_size: 30
+                        color: 0,0,0,1
+                        font_size: 40
                         size_hint: (None, 1)
                 
                     Label:
                         id: LivesNumber
                         text: root.lives_prop
-                        font_size: 30
+                        font_size: 40
+                        color: 0,0,0,1
                         size_hint: (None, 1)
                         
-                        
-
                     Label:
                         text:""
                         
-                                        
-                    
-
                 Button:
                     id: StartButtom
                     text: "Start"
-                    font_size: 30
+                    font_size: 40
                     size_hint: 0.3, 1
+                    background_normal:"btn_normal.png"
                     on_press: root.on_start()
-                    
-                    
                     
             Label:
                 id: Question
                 text: root.currant_q_and_a[0]
-                font_size: 30
+                color: 0,0,0,1
+                font_size: 100
                 size_hint: 1, 0.9
 
-                
             BoxLayout:
                 size_hint: 1, 0.4
                 AnswerButton:
                     id: A1 
                     text: root.currant_q_and_a[1]
-                    font_size: 30
                     on_press: root.on_check_answer(self)
                     
-                    
-                
                 AnswerButton:
                     id: A2 
                     text: root.currant_q_and_a[2]
-                    font_size: 30
                     on_press: root.on_check_answer(self)
                     
             BoxLayout:
@@ -164,28 +147,26 @@
                 AnswerButton:
                     id: A3 
                     text: root.currant_q_and_a[3]
-                    font_size: 30
                     on_press: root.on_check_answer(self)
 
                 AnswerButton:
                     id: A4 
                     text: root.currant_q_and_a[4]
-                    font_size: 30
                     on_press: root.on_check_answer(self)
-
-
 
 <WinScreen>:
     Label:
-        text:"You won"
+        color: 0,0,0,1
+        text:"You are the best"
+        font_size: 100
     Button:
-        
         on_press:
             root.manager.transition.direction = 'right'
             root.manager.current = 'MainScreen'
 
         size_hint: 0.2, 0.06
         pos_hint: {"x":0, "y":0.94}
+        background_normal:"btn_normal.png"
 
         Image:
             source: "./Arrow_white.png"
@@ -195,15 +176,17 @@
 
 <LoseScreen>:
     Label:
+        color: 0,0,0,1
         text:"Game Over"
+        font_size: 100
     Button:
-        
         on_press:
             root.manager.transition.direction = 'right'
             root.manager.current = 'MainScreen'
 
         size_hint: 0.2, 0.06
         pos_hint: {"x":0, "y":0.94}
+        background_normal:"btn_normal.png"
 
         Image:
             source: "./Arrow_white.png"

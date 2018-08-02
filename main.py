@@ -7,6 +7,7 @@ from kivy.lang import Builder
 from kivy.clock import Clock
 from kivy.logger import Logger
 from kivy.properties import StringProperty, ListProperty, BooleanProperty
+from kivy.core.window import Window
 import time
 import random as r
 import os
@@ -29,13 +30,23 @@ class AnswerButton(Button):
         super(AnswerButton, self).__init__(**kw)
     answer_value = BooleanProperty(False)
 
+    def on_press(self):
+        if self.answer_value:
+            self.background_normal = "btn_good.png"
+        else:
+            self.background_normal = "btn_wrong.png"
+
+    def reset_color(self):
+        self.background_normal = "btn_normal.png"
+
 
 class QAScreen(Screen):
     # this class has to manage the questions and answers from a given collection
-    DEFAULT_TIMER_TIME = 30
-    DEFAULT_Q_AND_A_VALUES = ["Question", "A1", "A2", "A3", "A4"]
-    DEFAULT_COLLECTIONS_FOLDER = "collections"
-    DEFAULT_FILE_EXTENSION = ".txt"
+    TIMER_TIME = 30
+    Q_AND_A_VALUES = ["Question", "A1", "A2", "A3", "A4"]
+    COLLECTIONS_FOLDER = "collections"
+    FILE_EXTENSION = ".txt"
+    TRANSITION_BETWEEN_QUESTIONS = 1
 
     def __init__(self, **kw):
         super(QAScreen, self).__init__(**kw)
@@ -58,12 +69,16 @@ class QAScreen(Screen):
     currant_q_and_a = ListProperty(["Question", "A1", "A2", "A3", "A4"])
     lives_prop = StringProperty("3")
 
+    def reset_btn_colors(self):
+        for i in range(4):
+            self.ids["A"+str(i+1)].reset_color()
+
     def set_is_exit_timer(self):
         self.is_exit_timer = True
 
     def set_to_default_currant_q_and_a(self):
         for i in range(len(self.currant_q_and_a)):
-            self.currant_q_and_a[i] = self.DEFAULT_Q_AND_A_VALUES[i]
+            self.currant_q_and_a[i] = self.Q_AND_A_VALUES[i]
 
     def reset_screen(self):
         self.questions = None
@@ -72,12 +87,13 @@ class QAScreen(Screen):
         self.is_game_started = False
         self.is_game_over = False
         self.is_exit_timer = False
-        self.time_prop = str(self.DEFAULT_TIMER_TIME)
+        self.time_prop = str(self.TIMER_TIME)
         self.set_to_default_currant_q_and_a()
         self.lives_prop = str(self.lives)
+        self.reset_btn_colors()
         
     def load_collection(self, file_name):
-        with open(file_name + self.DEFAULT_FILE_EXTENSION, "r") as file:
+        with open(file_name + self.FILE_EXTENSION, "r") as file:
             contents = file.readlines()
             contents = [item.replace("\n", "") for item in contents]
             contents = [item.split(",") for item in contents]
@@ -106,9 +122,9 @@ class QAScreen(Screen):
             if btn.answer_value:    
                 # go to next question if it is possible
                 if self.question_index < len(self.questions) - 1:
-                    self.update_question()
+                    Clock.schedule_once(lambda dt: self.update_q_and_a(), self.TRANSITION_BETWEEN_QUESTIONS)
                 else:
-                    self.win()
+                    Clock.schedule_once(lambda dt: self.win(), self.TRANSITION_BETWEEN_QUESTIONS)
                 
             else:
                 # decrease lives
@@ -117,7 +133,7 @@ class QAScreen(Screen):
                     # update lives_prop
                     self.lives_prop = str(self.lives)
                 else:
-                    self.game_over()
+                    Clock.schedule_once(lambda dt: self.game_over(), self.TRANSITION_BETWEEN_QUESTIONS)
                     
     def win(self):
         self.manager.current = self.winScreen
@@ -127,7 +143,9 @@ class QAScreen(Screen):
         self.is_game_started = False
         self.manager.current = self.loseScreen
 
-    def update_question(self, *args):
+    def update_q_and_a(self, *args):
+        self.reset_btn_colors()
+
         self.question_index += 1
 
         answer = self.questions[self.question_index][0]
@@ -146,6 +164,8 @@ class QAScreen(Screen):
 
             index_list.pop(random_index)
 
+        
+
     def on_start(self):
         if not self.is_game_started:
             # Set state variables
@@ -154,11 +174,11 @@ class QAScreen(Screen):
             self.is_exit_timer = False
             # Start a clock
             
-            self.timer.start(self.DEFAULT_TIMER_TIME)
+            self.timer.start(self.TIMER_TIME)
             Clock.schedule_interval(self.update_clock, 1.0/60.0)
             # Load and set questions and answers
-            self.questions = self.load_collection(self.DEFAULT_COLLECTIONS_FOLDER + "/" + self.selected_collection)
-            self.update_question()
+            self.questions = self.load_collection(self.COLLECTIONS_FOLDER + "/" + self.selected_collection)
+            self.update_q_and_a()
     
     def update_clock(self, dt):
         if int(self.time_prop) == 0:
@@ -189,7 +209,7 @@ class MainScreen(Screen):
 
 
 class CollectionSelectScreen(Screen):
-    DEFAULT_COLLECTIONS_FOLDER = "./collections"
+    COLLECTIONS_FOLDER = "./collections"
 
     def __init__(self, **kw):
         super(CollectionSelectScreen, self).__init__(**kw)
@@ -200,13 +220,13 @@ class CollectionSelectScreen(Screen):
         self.initialize_screen_layout()
 
     def load_collections(self):
-        if os.path.isdir(self.DEFAULT_COLLECTIONS_FOLDER):
-            self.collections = sorted(os.listdir(self.DEFAULT_COLLECTIONS_FOLDER))
+        if os.path.isdir(self.COLLECTIONS_FOLDER):
+            self.collections = sorted(os.listdir(self.COLLECTIONS_FOLDER))
 
     def initialize_screen_layout(self):
         box_layout = self.ids["btn_container"]
         for i in range(len(self.collections)):
-            btn = Button(text=self.collections[i].replace(".txt", ''))
+            btn = Button(text=self.collections[i].replace(".txt", ''), background_normal="btn_normal.png", font_size=60)
             btn.bind(on_press=self.on_select)
             box_layout.add_widget(btn)
 
@@ -216,11 +236,11 @@ class CollectionSelectScreen(Screen):
         self.manager.transition.direction = 'left'
         self.manager.current = "QAScreen"
     
-
-class MyApp(App):
+    
+class DedicateApp(App):
     def build(self):
+        Window.clearcolor = (1, 1, 1, 1)
         screen_manager = ScreenManager()
-
         screen_manager.add_widget(MainScreen())
         screen_manager.add_widget(CollectionSelectScreen())
         screen_manager.add_widget(QAScreen())
@@ -231,4 +251,4 @@ class MyApp(App):
         
 
 if __name__ == '__main__':
-    MyApp().run()
+    DedicateApp().run()
