@@ -46,7 +46,7 @@ class QAScreen(Screen):
     Q_AND_A_VALUES = ["Question", "A1", "A2", "A3", "A4"]
     COLLECTIONS_FOLDER = "collections"
     FILE_EXTENSION = ".txt"
-    TRANSITION_BETWEEN_QUESTIONS = 1
+    TRANSITION_TIME_BETWEEN_QUESTIONS = 1
 
     def __init__(self, **kw):
         super(QAScreen, self).__init__(**kw)
@@ -122,9 +122,9 @@ class QAScreen(Screen):
             if btn.answer_value:    
                 # go to next question if it is possible
                 if self.question_index < len(self.questions) - 1:
-                    Clock.schedule_once(lambda dt: self.update_q_and_a(), self.TRANSITION_BETWEEN_QUESTIONS)
+                    Clock.schedule_once(lambda dt: self.update_q_and_a(), self.TRANSITION_TIME_BETWEEN_QUESTIONS)
                 else:
-                    Clock.schedule_once(lambda dt: self.win(), self.TRANSITION_BETWEEN_QUESTIONS)
+                    Clock.schedule_once(lambda dt: self.win(), self.TRANSITION_TIME_BETWEEN_QUESTIONS)
                 
             else:
                 # decrease lives
@@ -133,7 +133,7 @@ class QAScreen(Screen):
                     # update lives_prop
                     self.lives_prop = str(self.lives)
                 else:
-                    Clock.schedule_once(lambda dt: self.game_over(), self.TRANSITION_BETWEEN_QUESTIONS)
+                    Clock.schedule_once(lambda dt: self.game_over(), self.TRANSITION_TIME_BETWEEN_QUESTIONS)
                     
     def win(self):
         self.manager.current = self.winScreen
@@ -236,7 +236,7 @@ class CollectionSelectScreen(Screen):
         self.manager.transition.direction = 'left'
         self.manager.current = "QAScreen"
     
-    
+
 class DedicateApp(App):
     def build(self):
         Window.clearcolor = (1, 1, 1, 1)
