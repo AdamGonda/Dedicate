@@ -1,0 +1,47 @@
+
+
+QA Screen:
+
+Start game:
+----------------------------------------------
+Push the start button and start a Q&A session. <<< Done
+You have x time to solve the questions         <<< Done
+You have x "lifes" to make mistakes            <<< Done
+----------------------------------------------
+
+If you win:
+----------------------------------------------
+Some effect indicator thah you won
+>>> Put you on WIN screen                      <<< Done
+    Next collection
+    Exit
+----------------------------------------------
+
+If you lose:
+----------------------------------------------
+Scenario 1: Your time is ran out.              <<< Done
+Scenario 2: Your lifes are out.                <<< Done
+>>> Put you on to the screen before Q&A        <<< Done
+    Try again
+    Exit
+----------------------------------------------
+
+Back button:
+----------------------------------------------
+Continue
+Try again
+Exit
+----------------------------------------------
+
+
+
+TODO:
+----------------------------------------------
+question counter
+life counter
+
+bool => is_started
+int => lifes
+int => questions
+int => time
+----------------------------------------------

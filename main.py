@@ -42,7 +42,7 @@ class AnswerButton(Button):
 
 class QAScreen(Screen):
     # this class has to manage the questions and answers from a given collection
-    TIMER_TIME = 30
+    TIMER_TIME = 10
     Q_AND_A_VALUES = ["Question", "A1", "A2", "A3", "A4"]
     COLLECTIONS_FOLDER = "collections"
     FILE_EXTENSION = ".txt"
@@ -72,9 +72,6 @@ class QAScreen(Screen):
     def reset_btn_colors(self):
         for i in range(4):
             self.ids["A"+str(i+1)].reset_color()
-
-    def set_is_exit_timer(self):
-        self.is_exit_timer = True
 
     def set_to_default_currant_q_and_a(self):
         for i in range(len(self.currant_q_and_a)):
@@ -124,6 +121,7 @@ class QAScreen(Screen):
                 if self.question_index < len(self.questions) - 1:
                     Clock.schedule_once(lambda dt: self.update_q_and_a(), self.TRANSITION_TIME_BETWEEN_QUESTIONS)
                 else:
+                    self.is_exit_timer = True
                     Clock.schedule_once(lambda dt: self.win(), self.TRANSITION_TIME_BETWEEN_QUESTIONS)
                 
             else:
@@ -163,8 +161,6 @@ class QAScreen(Screen):
             self.ids["A"+str(i)].answer_value = question_value
 
             index_list.pop(random_index)
-
-        
 
     def on_start(self):
         if not self.is_game_started:
