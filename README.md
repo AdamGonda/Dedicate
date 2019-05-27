@@ -21,7 +21,13 @@ During one session you have limited time and lives to answer them and depending 
 
 ## What I learned?
 Before this project, I didn't deal with the OOP aspects of Python and any kind of UI stuff and I don't know the [Kivy](https://kivy.org) framework.
-So mostly these were the most challenges parts of this project, Kivy is mostly well documented but I had a hard time to grasp some parts of the framework sometimes. The other was the OOP in Python like what is exactly the self part means, and why do you have to specify it as the first parameter in the method signature. I am happy with the results, and I learned a lot from it.
+So mostly these were the most challenging parts of this project, Kivy is mostly well documented but I had a hard time to grasp some parts of the framework sometimes. The other was the OOP in Python like:
+##### What is exactly the self part means, and why do you have to specify it as the first parameter in the method signature. 
+```python
+def do_something(self):
+    ...
+```
+So I am happy with the results and I learned a lot from this project.
 
 
 ## Last but not least two gifs and the flow of the app
