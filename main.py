@@ -73,6 +73,9 @@ class QAScreen(Screen):
         for i in range(4):
             self.ids["A"+str(i+1)].reset_color()
 
+    def set_is_exit_timer(self):
+        self.is_exit_timer = True
+
     def set_to_default_currant_q_and_a(self):
         for i in range(len(self.currant_q_and_a)):
             self.currant_q_and_a[i] = self.Q_AND_A_VALUES[i]
